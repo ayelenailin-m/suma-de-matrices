@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suma de matrices con Node.js</title>
+</head>
+<body>
+    <h1>Suma de matrices</h1>
+
+    <label>Filas: <input type="number" name="" id="filas" min="1"></label>
+    <label>Columnas: <input type="number" name="" id="columnas" min="1"></label>
+    <button onclick="generarInputs()">Generar Matrices</button>
+
+    <div id="matrices"></div>
+    <button onclick="sumarMatrices()" style="display:none;" id="btnSumar">Sumar matrices</button>
+
+    <h2>Resultado</h2>
+    <div id="resultado"></div>
+
+    <script>
+        function generarInputs() {
+            let filas = parseInt(document.getElementById("filas").value);
+            let columnas = parseInt(document.getElementById("columnas").value);
+            let contenedor = document.getElementById("matrices");
+            contenedor.innerHTML = "";
+
+            for (let m = 1; m <= 2; m++) {
+                let matrizDiv = document.createElement("div");
+                matrizDiv.innerHTML = `<h3>Matriz ${m}</h3>`;
+                for (let i = 0; i < filas; i++) {
+                for (let j = 0; j < columnas; j++) {
+                    matrizDiv.innerHTML += `<input type="number" id="m${m}_${i}_${j}" required>`;
+                }
+                matrizDiv.innerHTML += "<br>";
+                }
+                contenedor.appendChild(matrizDiv);
+            }
+            document.getElementById("btnSumar").style.display = "block";
+        }
+
+        function sumarMatrices() {
+            let filas = parseInt(document.getElementById("filas").value);
+            let columnas = parseInt(document.getElementById("columnas").value);
+
+            if (!filas || !columnas) {
+                alert("Por favor, ingrese el número de filas y columnas.");
+                return;
+            }
+
+            let matriz1 = [],
+                matriz2 = [];
+
+            // Verificar si los valores son numéricos
+            for (let i = 0; i < filas; i++) {
+                let fila1 = [],
+                    fila2 = [];
+                for (let j = 0; j < columnas; j++) {
+                    let valor1 = parseFloat(document.getElementById(`m1_${i}_${j}`).value);
+                    let valor2 = parseFloat(document.getElementById(`m2_${i}_${j}`).value);
+
+                    // Verificar si los valores son numéricos
+                    if (isNaN(valor1) || isNaN(valor2)) {
+                        alert("Por favor, ingrese valores numéricos válidos en todas las celdas.");
+                        return;
+                    }
+
+                    fila1.push(valor1);
+                    fila2.push(valor2);
+                }
+                matriz1.push(fila1);
+                matriz2.push(fila2);
+            }
+
+            fetch("/sumar", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ matriz1, matriz2 }),
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                let resultadoDiv = document.getElementById("resultado");
+                resultadoDiv.innerHTML = "<h3>Matriz Resultado</h3>";
+                data.resultado.forEach((fila) => {
+                    resultadoDiv.innerHTML += fila.join(" ") + "<br>";
+                });
+                });
+        }
+    </script>
+</body>
+</html>
